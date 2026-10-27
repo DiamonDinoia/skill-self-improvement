@@ -1,0 +1,14 @@
+This repository includes material derived from harness2.
+
+  Project:  harness2
+  Source:   https://github.com/google-research/harness2
+  License:  Apache-2.0
+  Commit:   1cfe254e8d25b15f37048c3730134686abe60335
+
+Upstream copyright line, from the harness2 source headers:
+
+  # Copyright 2026 Google LLC
+
+The improvement method and the adapted prompts in
+skills/self-improvement/references/prompts.md derive from harness2. That file
+keeps the Apache-2.0 notice. The rest of this repository is MIT; see LICENSE.

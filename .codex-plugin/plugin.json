@@ -1,0 +1,18 @@
+{
+  "name": "self-improvement",
+  "description": "Improve a skill with harness2's Propose-Probe-Compose loop. Non-destructive: candidates run on copies, nothing goes live without approval.",
+  "version": "0.1.0",
+  "author": { "name": "Marco Barbone", "url": "https://github.com/DiamonDinoia" },
+  "homepage": "https://github.com/DiamonDinoia/skill-self-improvement",
+  "repository": "https://github.com/DiamonDinoia/skill-self-improvement",
+  "license": "MIT",
+  "keywords": ["skills", "self-improvement", "harness", "agents", "prompt-improvement"],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "self-improvement",
+    "shortDescription": "Skill improvement via Propose-Probe-Compose",
+    "longDescription": "Runs the harness2 Propose-Probe-Compose loop on a skill: proposes general and domain candidates, probes them on copies of the task, and composes the adopted improvements after approval.",
+    "category": "Productivity",
+    "capabilities": ["Instructions"]
+  }
+}
