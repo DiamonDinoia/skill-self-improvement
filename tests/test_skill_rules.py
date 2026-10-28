@@ -54,7 +54,7 @@ def check(text):
     fm = parse_frontmatter(text)
     if fm.get("name") != "self-improvement":
         errors.append(f"name: {fm.get('name')!r}")
-    if fm.get("version") != "0.1.0":
+    if fm.get("version") != "0.2.0":
         errors.append(f"version: {fm.get('version')!r}")
     if "MIT" not in fm.get("license", ""):
         errors.append(f"license: {fm.get('license')!r}")
@@ -74,7 +74,7 @@ def check(text):
 def test_frontmatter():
     fm = parse_frontmatter(SKILL_MD.read_text())
     assert fm["name"] == "self-improvement"
-    assert fm["version"] == "0.1.0"
+    assert fm["version"] == "0.2.0"
     assert "MIT" in fm["license"]
     assert fm["description"].startswith("Use when")
 

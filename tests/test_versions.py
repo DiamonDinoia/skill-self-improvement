@@ -60,7 +60,7 @@ def version_errors(root):
 
 
 def make_fixture(tmp_path):
-    """Copy the real manifests and add a minimal SKILL.md at version 0.1.0."""
+    """Copy the real manifests and add a minimal SKILL.md at version 0.2.0."""
     for rel in JSON_MANIFESTS:
         dst = tmp_path / rel
         dst.parent.mkdir(parents=True, exist_ok=True)
@@ -71,7 +71,7 @@ def make_fixture(tmp_path):
         "---\n"
         "name: self-improvement\n"
         "description: test fixture\n"
-        "version: 0.1.0\n"
+        "version: 0.2.0\n"
         "---\n"
     )
     return tmp_path

@@ -20,16 +20,20 @@ The loop obeys seven rules.
 
 ## Install
 
+Fork this repository, clone your fork, then in the harness you want the skill in, tell the agent: "Follow INSTALL.md in this repo". The agent installs the skill by a link into its own harness.
+
+To install without an agent, run the command of your harness in this table by hand.
+
 | Harness | Command |
 |---|---|
 | Claude Code | `claude plugin marketplace add DiamonDinoia/skill-self-improvement && claude plugin install self-improvement@self-improvement --scope user` |
 | Codex CLI | `codex plugin marketplace add DiamonDinoia/skill-self-improvement`, then `codex plugin add self-improvement@self-improvement` |
 | Gemini CLI | `gemini extensions install https://github.com/DiamonDinoia/skill-self-improvement --consent` |
-| Hermes | `git clone https://github.com/DiamonDinoia/skill-self-improvement && ./skill-self-improvement/install.sh` |
-| opencode (by hand, scripted) | `git clone https://github.com/DiamonDinoia/skill-self-improvement && ./skill-self-improvement/install.sh` |
+| Hermes | fork the repo, clone your fork, then tell your agent: "Follow INSTALL.md in this repo" |
+| opencode | fork the repo, clone your fork, then tell your agent: "Follow INSTALL.md in this repo" |
 | by hand | `git clone https://github.com/DiamonDinoia/skill-self-improvement && ln -s "$PWD/skill-self-improvement/skills/self-improvement" ~/.claude/skills/self-improvement` |
 
-The three harnesses with a native manifest have one in this repository: `.claude-plugin/` for Claude Code, `.codex-plugin/` for Codex, and `gemini-extension.json` for Gemini CLI. `install.sh` symlinks the skill into the opencode and Hermes skill directories and the `/self-improvement` command into opencode. For a harness not in this table, install by hand, see the last row.
+The three harnesses with a native manifest have one in this repository: `.claude-plugin/` for Claude Code, `.codex-plugin/` for Codex, and `gemini-extension.json` for Gemini CLI. `INSTALL.md` gives an agent the steps that symlink the skill folder into the user skill folder of the harness that runs the agent. For a harness not in this table, install by hand, see the last row.
 
 ## Fork first
 

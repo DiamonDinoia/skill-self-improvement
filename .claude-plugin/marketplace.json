@@ -1,6 +1,6 @@
 {
   "name": "self-improvement",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Improve a skill with harness2's Propose-Probe-Compose loop. Non-destructive: candidates run on copies, nothing goes live without approval.",
   "owner": {
     "name": "Marco Barbone"

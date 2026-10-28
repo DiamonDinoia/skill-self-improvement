@@ -3,16 +3,48 @@ component mapping and the per-run schedule wording."""
 import re
 from pathlib import Path
 
-README = Path(__file__).resolve().parent.parent / "README.md"
+REPO_ROOT = Path(__file__).resolve().parent.parent
+README = REPO_ROOT / "README.md"
+INSTALL = REPO_ROOT / "INSTALL.md"
 
 # One install command per harness the sibling repos support.
 INSTALL_COMMANDS = {
     "Claude Code": "claude plugin marketplace add",
     "Codex": "codex plugin marketplace add",
     "Gemini": "gemini extensions install",
-    "Hermes": "install.sh",
-    "opencode": "install.sh",
+    "Hermes": "Follow INSTALL.md",
+    "opencode": "Follow INSTALL.md",
     "by hand": "ln -s",
+}
+README_POINT = "Follow INSTALL.md in this repo"
+
+# The hard rules of INSTALL.md. One pin per rule.
+# The one `mkdir` INSTALL.md allows creates the parent folder of the link name.
+MKDIR_CMD = 'mkdir -p "$(dirname "<link name>")"'
+INSTALL_RULES = {
+    "fork first": ("Fork this repository first", "clone the fork"),
+    "own harness name": ("Name the harness that runs this agent",),
+    "ask if unsure": ("ask the user and stop until the user answers",),
+    "own harness only": ("Install in that harness only",),
+    "link only install": ("Install only by a symlink of the skill folder",),
+    "no config writes": ("Do not run a command that writes a harness config file",
+                         "Do not edit a harness config file by hand"),
+    "no native command run by agent": ("The agent does not run it",),
+    "stop when occupied": ("If anything else is at the link name",
+                           "stop and tell the user the path",
+                           "Do not move, back up or delete it"),
+    "absolute source": ("Resolve the source `skills/self-improvement` in the clone with `realpath`",
+                        "Keep the result as the absolute source"),
+    "ordinary quotes": ("ordinary shell double quotes", "Do not add backslashes"),
+    "correct link stops": ("do no more. Report this and stop.",),
+    "state test first": ("Test the link name with `test -L`",
+                         "If `test -L` exits non-zero, continue at step 6"),
+    "link flags": ("ln -sTn",),
+    "mkdir parent-only": (MKDIR_CMD,),
+    "link resolves": ('`readlink -f` of the link name equals the absolute source',
+                      '`test -e` of the link name exits 0'),
+    "restart hint": ("Tell the user to restart the harness",),
+    "failure rule": ("If a command exits non-zero, stop and report", "Keep all paths as they are"),
 }
 
 # The component mapping of SKILL.md, in its own words.
@@ -125,3 +157,132 @@ def test_rule_tail_pins_fail_when_deleted(tmp_path):
         copy.write_text(text.replace(tail, ""))
         findings = readme_findings(copy.read_text())
         assert any("rule tail" in f for f in findings), f"the check must pin {tail}"
+
+
+# The INSTALL.md hard-rule pins and the README pointer pin.
+
+# The old marker and the backup machinery tokens must stay out of INSTALL.md.
+FORBIDDEN_TOKENS = {
+    "no find -newer": ("MARKER", "-newer"),
+    "no .bak-": (".bak-",),
+    "no diff -r": ("diff -r",),
+    "no cp -a": ("cp -a",),
+    "no sha256sum": ("sha256sum",),
+}
+
+def install_findings(text):
+    """Return one finding per missing hard rule; empty when complete."""
+    findings = []
+    for rule, phrases in INSTALL_RULES.items():
+        for phrase in phrases:
+            if phrase not in text:
+                findings.append(f"INSTALL.md misses the {rule} rule: {phrase}")
+    for rule, tokens in FORBIDDEN_TOKENS.items():
+        for token in tokens:
+            if token in text:
+                findings.append(f"INSTALL.md breaks the {rule} rule: it keeps the token {token!r}")
+    if "mkdir" in text.replace(MKDIR_CMD, ""):
+        findings.append("INSTALL.md breaks the mkdir parent-only rule: it runs `mkdir` outside the parent folder of the link name")
+    return findings
+
+
+def install_file_findings(root):
+    """Check INSTALL.md under root. Missing file is one finding."""
+    path = Path(root) / "INSTALL.md"
+    if not path.is_file():
+        return ["INSTALL.md is missing"]
+    return install_findings(path.read_text())
+
+
+def readme_pointer_findings(text):
+    return [] if README_POINT in text else ["README does not point to INSTALL.md"]
+
+
+def drop_lines(text, *needles):
+    lines = text.splitlines(keepends=True)
+    kept = [ln for ln in lines if not any(n in ln for n in needles)]
+    assert kept != lines, f"no line matched {needles}"
+    return "".join(kept)
+
+
+# One entry per pin: name, the file, the checker, the mutator that removes the rule.
+def insert_token(token):
+    """Put a forbidden token at the top of the text so the pin must fire."""
+    return lambda root, t: t.replace("# Install\n", f"# Install\n\n{token}\n", 1)
+
+INSTALL_MUTATIONS = [
+    ("INSTALL.md exists", None, install_file_findings,
+     lambda root, t: root),
+    ("fork first", "INSTALL.md", install_findings,
+     lambda root, t: drop_lines(t, *INSTALL_RULES["fork first"])),
+    ("own harness name", "INSTALL.md", install_findings,
+     lambda root, t: drop_lines(t, *INSTALL_RULES["own harness name"])),
+    ("ask if unsure", "INSTALL.md", install_findings,
+     lambda root, t: drop_lines(t, *INSTALL_RULES["ask if unsure"])),
+    ("own harness only", "INSTALL.md", install_findings,
+     lambda root, t: drop_lines(t, *INSTALL_RULES["own harness only"])),
+    ("link only install", "INSTALL.md", install_findings,
+     lambda root, t: drop_lines(t, *INSTALL_RULES["link only install"])),
+    ("no config writes", "INSTALL.md", install_findings,
+     lambda root, t: drop_lines(t, *INSTALL_RULES["no config writes"])),
+    ("no native command run by agent", "INSTALL.md", install_findings,
+     lambda root, t: drop_lines(t, *INSTALL_RULES["no native command run by agent"])),
+    ("stop when occupied", "INSTALL.md", install_findings,
+     lambda root, t: drop_lines(t, *INSTALL_RULES["stop when occupied"])),
+    ("absolute source", "INSTALL.md", install_findings,
+     lambda root, t: drop_lines(t, *INSTALL_RULES["absolute source"])),
+    ("correct link stops", "INSTALL.md", install_findings,
+     lambda root, t: drop_lines(t, *INSTALL_RULES["correct link stops"])),
+    ("state test first", "INSTALL.md", install_findings,
+     lambda root, t: drop_lines(t, "Test the link name with `test -L`")),
+    ("ordinary quotes", "INSTALL.md", install_findings,
+     lambda root, t: drop_lines(t, "ordinary shell double quotes")),
+    ("link flags", "INSTALL.md", install_findings,
+     lambda root, t: drop_lines(t, *INSTALL_RULES["link flags"])),
+    ("link resolves", "INSTALL.md", install_findings,
+     lambda root, t: drop_lines(t, *INSTALL_RULES["link resolves"])),
+    ("restart hint", "INSTALL.md", install_findings,
+     lambda root, t: drop_lines(t, *INSTALL_RULES["restart hint"])),
+    ("failure rule", "INSTALL.md", install_findings,
+     lambda root, t: drop_lines(t, *INSTALL_RULES["failure rule"])),
+    ("no find -newer", "INSTALL.md", install_findings,
+     insert_token("MARKER -newer")),
+    ("no .bak-", "INSTALL.md", install_findings,
+     insert_token(".bak-")),
+    ("mkdir parent-only", "INSTALL.md", install_findings,
+     lambda root, t: drop_lines(t, MKDIR_CMD)),
+    ("no diff -r", "INSTALL.md", install_findings,
+     insert_token("diff -r")),
+    ("no cp -a", "INSTALL.md", install_findings,
+     insert_token("cp -a")),
+    ("no sha256sum", "INSTALL.md", install_findings,
+     insert_token("sha256sum")),
+    ("README points to INSTALL.md", "README.md", readme_pointer_findings,
+     lambda root, t: t.replace(README_POINT, "")),
+]
+
+
+def test_install_pins_pass_on_the_repo_files():
+    assert install_file_findings(REPO_ROOT) == []
+    assert readme_pointer_findings(README.read_text()) == []
+
+
+def test_install_pins_fail_when_the_rule_is_removed(tmp_path):
+    """One observed negative per pin. The line records the observation."""
+    for name, rel, check, mutate in INSTALL_MUTATIONS:
+        root = tmp_path / name.replace(" ", "-")
+        root.mkdir()
+        if rel is None:
+            mutated_root = root
+            findings = install_file_findings(mutated_root)
+        else:
+            original = (REPO_ROOT / rel).read_text()
+            mutated = mutate(root, original)
+            assert mutated != original, f"the {name} mutation did nothing"
+            (root / rel).write_text(mutated)
+            findings = check(mutated)
+        state = "failed-loud" if findings else "SILENT PASS"
+        print(f"mutation: {name} removed -> {state}: {findings}")
+        assert findings, f"the {name} pin must fail when its rule is removed"
+        if rel == "INSTALL.md":
+            assert any(f"the {name} rule" in f for f in findings), f"the {name} pin did not fire"
