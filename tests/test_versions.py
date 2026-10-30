@@ -71,7 +71,7 @@ def make_fixture(tmp_path):
         "---\n"
         "name: self-improvement\n"
         "description: test fixture\n"
-        "version: 0.2.0\n"
+        "version: 0.3.0\n"
         "---\n"
     )
     return tmp_path

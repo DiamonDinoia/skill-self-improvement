@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.3.0
+
+- `INSTALL.md` detects the environment and asks one batched question message with the detected defaults. It shows the plan. The agent acts after the user approves the plan.
+- No self-fork: when the GitHub login owns `DiamonDinoia/skill-self-improvement`, the agent uses the existing clone.
+- Codex CLI gets a link into `${CODEX_HOME:-$HOME/.codex}/skills` when that folder exists. That folder route is observed, not documented. The plugin route is the fallback.
+- A harness plugin command runs only after the user approves the shown plan. Otherwise the agent prints it for the user.
+
 ## 0.2.0
 
 - `install.sh` is replaced by agent install instructions in `INSTALL.md`.

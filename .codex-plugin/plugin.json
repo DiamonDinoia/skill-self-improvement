@@ -1,7 +1,7 @@
 {
   "name": "self-improvement",
   "description": "Improve a skill with harness2's Propose-Probe-Compose loop. Non-destructive: candidates run on copies, nothing goes live without approval.",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "author": { "name": "Marco Barbone", "url": "https://github.com/DiamonDinoia" },
   "homepage": "https://github.com/DiamonDinoia/skill-self-improvement",
   "repository": "https://github.com/DiamonDinoia/skill-self-improvement",
